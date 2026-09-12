@@ -1,8 +1,7 @@
-
+Script · JS
 // script.js
-// Já consome a PokeAPI de verdade — mas AINDA:
-// - sem tratamento de erro (isso entra no próximo commit)
-// - sem o visual de cartão (isso entra no commit depois do de erros)
+// Já trata erros (busca sem resultado e falha de conexão) — mas AINDA sem o visual de cartão
+// (isso entra no próximo commit: "Estiliza cartao de resultados").
  
 const URL_BASE = "https://pokeapi.co/api/v2/pokemon/";
 const MAIOR_ID_CONHECIDO = 1025; // total aproximado de Pokémon cadastrados na API
@@ -12,15 +11,16 @@ const campoBusca = document.getElementById("campo-busca");
 const botaoAleatorio = document.getElementById("botao-aleatorio");
 const areaResultado = document.getElementById("resultado");
  
-// ---------- Função principal: consulta a API e mostra os dados (ainda sem try/catch) ----------
-async function buscarPokemon(termo) {
-  areaResultado.innerHTML = `<p>Carregando...</p>`;
+function mostrarCarregando() {
+  areaResultado.innerHTML = `<p class="carregando">Carregando...</p>`;
+}
  
-  const termoTratado = termo.toLowerCase().trim();
-  const resposta = await fetch(URL_BASE + termoTratado);
-  const dados = await resposta.json();
+function mostrarErro(mensagem) {
+  // Ainda sem classe estilizada — só a mensagem, sem formatação visual de destaque
+  areaResultado.innerHTML = `<p class="erro">${mensagem}</p>`;
+}
  
-  // Extraindo os campos que vamos exibir (mínimo de 3 informações da resposta)
+function montarResultado(dados) {
   const nome = dados.name;
   const numero = dados.id;
   const imagem = dados.sprites.front_default;
@@ -28,7 +28,6 @@ async function buscarPokemon(termo) {
   const peso = (dados.weight / 10).toFixed(1); // hectogramas → kg
   const habilidades = dados.abilities.map((a) => a.ability.name).join(", ");
  
-  // Ainda sem classe .cartao nem estilo — só a informação, sem formatação visual
   areaResultado.innerHTML = `
     <p>Nome: ${nome}</p>
     <p>Número: ${numero}</p>
@@ -37,6 +36,34 @@ async function buscarPokemon(termo) {
     <p>Peso: ${peso} kg</p>
     <p>Habilidades: ${habilidades}</p>
   `;
+}
+ 
+// ---------- Função principal: consulta a API com tratamento de erro ----------
+async function buscarPokemon(termo) {
+  if (!termo) return;
+  const termoTratado = termo.toLowerCase().trim();
+  mostrarCarregando();
+ 
+  try {
+    const resposta = await fetch(URL_BASE + termoTratado);
+ 
+    // A PokeAPI devolve 404 quando o nome/número não existe
+    if (resposta.status === 404) {
+      mostrarErro(`Nenhum Pokémon encontrado para "${termo}". Confira a grafia ou o número e tente de novo.`);
+      return;
+    }
+ 
+    if (!resposta.ok) {
+      throw new Error(`Erro HTTP ${resposta.status}`);
+    }
+ 
+    const dados = await resposta.json();
+    montarResultado(dados);
+  } catch (erro) {
+    // Cai aqui em falhas de rede, API fora do ar, ou qualquer outro erro inesperado
+    console.error("Falha ao buscar Pokémon:", erro);
+    mostrarErro("Não foi possível falar com a PokeAPI agora. Verifique sua conexão e tente novamente em instantes.");
+  }
 }
  
 function buscarAleatorio() {
@@ -48,11 +75,11 @@ function buscarAleatorio() {
 form.addEventListener("submit", (evento) => {
   evento.preventDefault();
   const termo = campoBusca.value.trim();
-  if (termo) buscarPokemon(termo);
-});
- 
-botaoAleatorio.addEventListener("click", buscarAleatorio);
-  if (termo) buscarPokemon(termo);
+  if (!termo) {
+    mostrarErro("Digite um nome ou número de Pokémon para buscar.");
+    return;
+  }
+  buscarPokemon(termo);
 });
  
 botaoAleatorio.addEventListener("click", buscarAleatorio);
