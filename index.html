@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pokédex Terminal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="unidade">
+    <header class="topo">
+      <span class="led"></span>
+      <h1>POKÉDEX <span class="versao">v1.0</span></h1>
+    </header>
+
+    <section class="tela">
+      <form id="form-busca" class="busca" autocomplete="off">
+        <label for="campo-busca" class="sr-only">Nome ou número do Pokémon</label>
+        <input
+          type="text"
+          id="campo-busca"
+          placeholder="nome ou número (ex.: pikachu, 25)"
+          required
+        />
+        <button type="submit" id="botao-buscar">BUSCAR</button>
+        <button type="button" id="botao-aleatorio">ALEATÓRIO</button>
+      </form>
+
+      <div id="resultado" aria-live="polite">
+        <p class="placeholder">&gt; Aguardando comando. Digite um nome, um número, ou peça um Pokémon aleatório.</p>
+      </div>
+    </section>
+
+    <footer class="rodape">
+      <p>Dados: <a href="https://pokeapi.co/" target="_blank" rel="noopener">PokeAPI</a> · Projeto Bootcamp II — Etapa 01</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
