@@ -1,4 +1,3 @@
-
 // script.js
 // Consome a PokeAPI (https://pokeapi.co) — sem chave, JSON via HTTPS, CORS liberado.
  
