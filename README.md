@@ -1,7 +1,7 @@
 # Pokédex Terminal
 
 ## Autor
-Seu Nome Completo — Matrícula 0000000
+Rachel Tolentino de Sena — Matrícula 22612246
 
 ## Descrição
 Aplicação web com visual de terminal retrô que consulta a PokeAPI e mostra dados completos de qualquer Pokémon: imagem, tipos, altura, peso, habilidades e estatísticas base. Útil para consultas rápidas ou apenas para se divertir descobrindo Pokémon aleatórios.
