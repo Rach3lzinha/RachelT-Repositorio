@@ -22,5 +22,5 @@ Aplicação web com visual de terminal retrô que consulta a PokeAPI e mostra da
 2. Abra o arquivo `index.html` no navegador
 
 ## Links
-- **Aplicação no ar (GitHub Pages):** https://seu-usuario.github.io/bootcamp2-app/
+- **Aplicação no ar (GitHub Pages):** https://rach3lzinha.github.io/RachelT-Repositorio/
 - **Repositório:** https://github.com/seu-usuario/bootcamp2-app
