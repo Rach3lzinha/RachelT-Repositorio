@@ -23,4 +23,4 @@ Aplicação web com visual de terminal retrô que consulta a PokeAPI e mostra da
 
 ## Links
 - **Aplicação no ar (GitHub Pages):** https://rach3lzinha.github.io/RachelT-Repositorio/
-- **Repositório:** https://github.com/seu-usuario/bootcamp2-app
+- **Repositório:** https://github.com/Rach3lzinha/RachelT-Repositorio
