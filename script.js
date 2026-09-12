@@ -1,86 +1,357 @@
-Script · JS
-// script.js
-// Já trata erros (busca sem resultado e falha de conexão) — mas AINDA sem o visual de cartão
-// (isso entra no próximo commit: "Estiliza cartao de resultados").
- 
-const URL_BASE = "https://pokeapi.co/api/v2/pokemon/";
-const MAIOR_ID_CONHECIDO = 1025; // total aproximado de Pokémon cadastrados na API
- 
-const form = document.getElementById("form-busca");
-const campoBusca = document.getElementById("campo-busca");
-const botaoAleatorio = document.getElementById("botao-aleatorio");
-const areaResultado = document.getElementById("resultado");
- 
-function mostrarCarregando() {
-  areaResultado.innerHTML = `<p class="carregando">Carregando...</p>`;
+:root {
+  --bg: #0b0d0f;
+  --painel: #171c1f;
+  --tela: #0c1712;
+  --fosforo: #6bffb0;
+  --fosforo-fraco: #3a8f66;
+  --ambar: #ffb454;
+  --led-vermelho: #ff5f56;
+  --texto: #d8e6df;
+  --borda: #2a3330;
+  --fonte-titulo: "Press Start 2P", monospace;
+  --fonte-corpo: "Share Tech Mono", monospace;
 }
  
-function mostrarErro(mensagem) {
-  // Ainda sem classe estilizada — só a mensagem, sem formatação visual de destaque
-  areaResultado.innerHTML = `<p class="erro">${mensagem}</p>`;
+* {
+  box-sizing: border-box;
 }
  
-function montarResultado(dados) {
-  const nome = dados.name;
-  const numero = dados.id;
-  const imagem = dados.sprites.front_default;
-  const altura = (dados.height / 10).toFixed(1); // decímetros → metros
-  const peso = (dados.weight / 10).toFixed(1); // hectogramas → kg
-  const habilidades = dados.abilities.map((a) => a.ability.name).join(", ");
- 
-  areaResultado.innerHTML = `
-    <p>Nome: ${nome}</p>
-    <p>Número: ${numero}</p>
-    <img src="${imagem}" alt="${nome}" width="120">
-    <p>Altura: ${altura} m</p>
-    <p>Peso: ${peso} kg</p>
-    <p>Habilidades: ${habilidades}</p>
-  `;
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2.5rem 1rem;
+  background: var(--bg);
+  background-image: radial-gradient(circle at 50% 0%, rgba(107, 255, 176, 0.05), transparent 55%);
+  font-family: var(--fonte-corpo);
+  color: var(--texto);
 }
  
-// ---------- Função principal: consulta a API com tratamento de erro ----------
-async function buscarPokemon(termo) {
-  if (!termo) return;
-  const termoTratado = termo.toLowerCase().trim();
-  mostrarCarregando();
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
  
-  try {
-    const resposta = await fetch(URL_BASE + termoTratado);
+/* ---------- Unidade (o "aparelho") ---------- */
  
-    // A PokeAPI devolve 404 quando o nome/número não existe
-    if (resposta.status === 404) {
-      mostrarErro(`Nenhum Pokémon encontrado para "${termo}". Confira a grafia ou o número e tente de novo.`);
-      return;
-    }
+.unidade {
+  width: 100%;
+  max-width: 560px;
+  background: var(--painel);
+  border: 1px solid var(--borda);
+  border-radius: 14px;
+  padding: 1.4rem;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
  
-    if (!resposta.ok) {
-      throw new Error(`Erro HTTP ${resposta.status}`);
-    }
+.topo {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.2rem 0.3rem 1.1rem;
+}
  
-    const dados = await resposta.json();
-    montarResultado(dados);
-  } catch (erro) {
-    // Cai aqui em falhas de rede, API fora do ar, ou qualquer outro erro inesperado
-    console.error("Falha ao buscar Pokémon:", erro);
-    mostrarErro("Não foi possível falar com a PokeAPI agora. Verifique sua conexão e tente novamente em instantes.");
+.led {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--led-vermelho);
+  box-shadow: 0 0 8px var(--led-vermelho), 0 0 2px rgba(0, 0, 0, 0.5) inset;
+  flex-shrink: 0;
+}
+ 
+.topo h1 {
+  font-family: var(--fonte-titulo);
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  margin: 0;
+  color: var(--texto);
+}
+ 
+.versao {
+  color: var(--fosforo-fraco);
+  font-size: 0.7rem;
+}
+ 
+/* ---------- Tela ---------- */
+ 
+.tela {
+  background: var(--tela);
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  padding: 1.3rem;
+  position: relative;
+  overflow: hidden;
+}
+ 
+.tela::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.025) 0px,
+    rgba(255, 255, 255, 0.025) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+ 
+/* ---------- Busca ---------- */
+ 
+.busca {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  position: relative;
+}
+ 
+#campo-busca {
+  flex: 1 1 180px;
+  padding: 0.7rem 0.8rem;
+  font-family: var(--fonte-corpo);
+  font-size: 0.95rem;
+  background: rgba(107, 255, 176, 0.05);
+  border: 1px solid var(--fosforo-fraco);
+  border-radius: 4px;
+  color: var(--fosforo);
+  caret-color: var(--fosforo);
+}
+ 
+#campo-busca::placeholder {
+  color: var(--fosforo-fraco);
+}
+ 
+#campo-busca:focus-visible {
+  outline: 2px solid var(--fosforo);
+  outline-offset: 1px;
+}
+ 
+#botao-buscar,
+#botao-aleatorio {
+  padding: 0.7rem 1rem;
+  font-family: var(--fonte-corpo);
+  font-weight: bold;
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+ 
+#botao-buscar {
+  background: var(--fosforo);
+  color: #06120c;
+}
+ 
+#botao-buscar:hover {
+  background: #85ffc0;
+}
+ 
+#botao-aleatorio {
+  background: transparent;
+  color: var(--ambar);
+  border: 1px solid var(--ambar);
+}
+ 
+#botao-aleatorio:hover {
+  background: rgba(255, 180, 84, 0.1);
+}
+ 
+#botao-buscar:focus-visible,
+#botao-aleatorio:focus-visible {
+  outline: 2px solid var(--texto);
+  outline-offset: 2px;
+}
+ 
+/* ---------- Resultado ---------- */
+ 
+#resultado {
+  position: relative;
+  min-height: 60px;
+}
+ 
+.placeholder {
+  color: var(--fosforo-fraco);
+  font-size: 0.9rem;
+  margin: 0;
+}
+ 
+.carregando {
+  color: var(--fosforo);
+  font-size: 0.9rem;
+  margin: 0;
+}
+ 
+.erro {
+  border: 1px solid var(--led-vermelho);
+  background: rgba(255, 95, 86, 0.08);
+  color: #ffb3ae;
+  padding: 0.9rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin: 0;
+}
+ 
+/* ---------- Cartão do Pokémon ---------- */
+ 
+.cartao {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 1rem;
+}
+ 
+.cartao .sprite-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(107, 255, 176, 0.04);
+  border: 1px solid var(--fosforo-fraco);
+  border-radius: 6px;
+  padding: 0.5rem;
+}
+ 
+.cartao img {
+  width: 100%;
+  image-rendering: pixelated;
+}
+ 
+.cabecalho {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  border-bottom: 1px dashed var(--fosforo-fraco);
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
+}
+ 
+.cabecalho h2 {
+  font-family: var(--fonte-titulo);
+  font-size: 1rem;
+  text-transform: capitalize;
+  color: var(--fosforo);
+  text-shadow: 0 0 6px rgba(107, 255, 176, 0.5);
+  margin: 0;
+}
+ 
+.numero {
+  font-size: 0.85rem;
+  color: var(--fosforo-fraco);
+}
+ 
+.tipos {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin: 0.2rem 0 0.8rem;
+}
+ 
+.tipo {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  color: #10120b;
+  font-weight: bold;
+}
+ 
+.medidas {
+  display: flex;
+  gap: 1.2rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.9rem;
+  color: var(--texto);
+}
+ 
+.medidas b {
+  color: var(--fosforo);
+}
+ 
+.habilidades {
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+ 
+.habilidades b {
+  color: var(--fosforo);
+}
+ 
+.stats {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+ 
+.stat-linha {
+  display: grid;
+  grid-template-columns: 90px 1fr 34px;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+}
+ 
+.stat-nome {
+  color: var(--fosforo-fraco);
+  text-transform: uppercase;
+}
+ 
+.stat-barra {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  height: 7px;
+  overflow: hidden;
+}
+ 
+.stat-preenchido {
+  height: 100%;
+  background: var(--fosforo);
+}
+ 
+.stat-valor {
+  text-align: right;
+  color: var(--texto);
+}
+ 
+@media (max-width: 420px) {
+  .cartao {
+    grid-template-columns: 1fr;
+  }
+  .cartao .sprite-wrap {
+    max-width: 160px;
+    margin: 0 auto;
   }
 }
  
-function buscarAleatorio() {
-  const idAleatorio = Math.floor(Math.random() * MAIOR_ID_CONHECIDO) + 1;
-  campoBusca.value = idAleatorio;
-  buscarPokemon(String(idAleatorio));
+/* ---------- Rodapé ---------- */
+ 
+.rodape {
+  text-align: center;
+  font-size: 0.72rem;
+  color: rgba(216, 230, 223, 0.4);
+  padding-top: 1.1rem;
 }
  
-form.addEventListener("submit", (evento) => {
-  evento.preventDefault();
-  const termo = campoBusca.value.trim();
-  if (!termo) {
-    mostrarErro("Digite um nome ou número de Pokémon para buscar.");
-    return;
-  }
-  buscarPokemon(termo);
-});
+.rodape a {
+  color: var(--fosforo-fraco);
+}
  
-botaoAleatorio.addEventListener("click", buscarAleatorio);
+/* ---------- Redução de movimento ---------- */
+ 
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
  
