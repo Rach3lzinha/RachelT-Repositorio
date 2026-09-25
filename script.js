@@ -1,3 +1,16 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const SUPABASE_URL =
+  "https://hivfuatqzbsjpvkogaxz.supabase.co";
+
+const SUPABASE_ANON_KEY =
+  "sb_publishable_5IE9a5qhVuu2EHU6j6UhFA_DvQHWPmM";
+
+const supabase = createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+ );
+
 const supabase = window.supabaseClient;
 
 const formulario = document.getElementById("form-busca");
