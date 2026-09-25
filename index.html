@@ -10,7 +10,6 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
   <div class="unidade">
     <header class="topo">
       <span class="led"></span>
@@ -20,12 +19,7 @@
     <section class="tela">
       <form id="form-busca" class="busca" autocomplete="off">
         <label for="campo-busca" class="sr-only">Nome ou número do Pokémon</label>
-        <input
-          type="text"
-          id="campo-busca"
-          placeholder="nome ou número (ex.: pikachu, 25)"
-          required
-        />
+        <input type="text" id="campo-busca" placeholder="nome ou número (ex.: pikachu, 25)" required />
         <button type="submit" id="botao-buscar">BUSCAR</button>
         <button type="button" id="botao-aleatorio">ALEATÓRIO</button>
       </form>
@@ -33,6 +27,13 @@
       <div id="resultado" aria-live="polite">
         <p class="placeholder">&gt; Aguardando comando. Digite um nome, um número, ou peça um Pokémon aleatório.</p>
       </div>
+
+      <section class="favoritos">
+        <h2>POKÉMON SALVOS</h2>
+        <div id="lista-favoritos" aria-live="polite">
+          <p class="placeholder">&gt; Carregando...</p>
+        </div>
+      </section>
     </section>
 
     <footer class="rodape">
@@ -40,17 +41,7 @@
     </footer>
   </div>
 
-<section class="favoritos">
-  <h2>FAVORITOS</h2>
-  <div id="lista-favoritos">
-    <p class="placeholder">> Nenhum favorito salvo.
-          &gt; Nenhum favorito salvo.
-    </p>
-  </div>
-</section>
-
-  
-<script type="module" src="script.js"></script>
-
+  <!-- O script.js importa o Supabase. Não adicione outro script de conexão aqui. -->
+  <script type="module" src="./script.js"></script>
 </body>
 </html>
