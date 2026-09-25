@@ -7,11 +7,9 @@ const SUPABASE_ANON_KEY =
   "sb_publishable_5IE9a5qhVuu2EHU6j6UhFA_DvQHWPmM";
 
 const supabase = createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
+  "https://hivfuatqzbsjpvkogaxz.supabase.co",
+  "SUA_CHAVE_PUBLICA"
  );
-
-const supabase = window.supabaseClient;
 
 const formulario = document.getElementById("form-busca");
 const campoBusca = document.getElementById("campo-busca");
@@ -127,36 +125,41 @@ function renderizarPokemon(pokemon) {
 // CREATE — salvar favorito
 async function salvarFavorito(nome, extra) {
   const { error } = await supabase
-    .from("favoritos")
+    .from("Pokedex")
     .insert({
-      nome_item: nome,
-      dados_extra: extra
+      id: extra.id,
+      nome: nome,
+      altura: extra.altura,
+      peso: extra.peso,
+      imagem_url: extra.imagem_url,
+      tipos: extra.tipos.join(", "),
+      habilidades: extra.habilidades.join(", "),
+      estatisticas: extra.estatisticas
     });
 
   if (error) {
     console.error("Erro ao salvar favorito:", error);
-    alert("Erro ao salvar favorito.");
+    alert("Erro ao salvar: " + error.message);
     return;
   }
 
-  alert("Favorito salvo com sucesso!");
+  alert("Pokémon salvo na tabela Pokedex!");
   listarFavoritos();
 }
+
 
 // READ — listar favoritos
 async function listarFavoritos() {
   const { data, error } = await supabase
-    .from("favoritos")
+    .from("Pokedex")
     .select("*")
-    .order("criado_em", {
-      ascending: false
-    });
+    .order("id");
 
   if (error) {
-    console.error("Erro ao listar favoritos:", error);
+    console.error("Erro ao listar Pokémon:", error);
     mostrarMensagem(
       listaFavoritos,
-      "Erro ao carregar favoritos."
+      "Erro ao carregar os Pokémon."
     );
     return;
   }
@@ -164,24 +167,24 @@ async function listarFavoritos() {
   if (!data || data.length === 0) {
     mostrarMensagem(
       listaFavoritos,
-      "Nenhum favorito salvo."
+      "Nenhum Pokémon salvo."
     );
     return;
   }
 
   listaFavoritos.innerHTML = data
     .map(
-      (favorito) => `
+      (pokemon) => `
         <div class="favorito">
           <span>
-            #${favorito.dados_extra?.id ?? ""}
-            ${escaparHTML(favorito.nome_item)}
+            #${pokemon.id}
+            ${escaparHTML(pokemon.nome)}
           </span>
 
           <button
             type="button"
             class="botao-remover"
-            data-id="${favorito.id}"
+            data-id="${pokemon.id}"
           >
             REMOVER
           </button>
@@ -202,18 +205,19 @@ async function listarFavoritos() {
 // DELETE — remover favorito
 async function removerFavorito(id) {
   const { error } = await supabase
-    .from("favoritos")
+    .from("Pokedex")
     .delete()
     .eq("id", id);
 
   if (error) {
-    console.error("Erro ao remover favorito:", error);
-    alert("Erro ao remover favorito.");
+    console.error("Erro ao remover Pokémon:", error);
+    alert("Erro ao remover: " + error.message);
     return;
   }
 
   listarFavoritos();
 }
+
 
 // Botão BUSCAR
 formulario.addEventListener("submit", (evento) => {
