@@ -1,22 +1,17 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const SUPABASE_URL =
-  "https://hivfuatqzbsjpvkogaxz.supabase.co";
+// Use somente a URL base do projeto. Não acrescente /rest/v1/.
+const SUPABASE_URL = "https://hivfuatqzbsjpvkogaxz.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpdmZ1YXRxemJzanB2a29nYXh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzNjUwNDIsImV4cCI6MjEwNTk0MTA0Mn0.V6U3qJZc6gzAHMtw1giR7gEgyuO4ZQX8uTv3x0DtiHA";
 
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpdmZ1YXRxemJzanB2a29uZ2F4eiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzkwMzY1MDQyLCJleHAiOjIxMDU5NDEwNDJ9.V6U3qJZc6gzAHMtw1giR7gEgyuO4ZQX8uTv3x0DtiHA";
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const TABELA = "Pokedex";
 
-const supabase = createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
- );
-
-
-const formulario = document.getElementById("form-busca");
-const campoBusca = document.getElementById("campo-busca");
-const botaoAleatorio = document.getElementById("botao-aleatorio");
-const resultado = document.getElementById("resultado");
-const listaFavoritos = document.getElementById("lista-favoritos");
+const formulario = document.querySelector("#form-busca");
+const campoBusca = document.querySelector("#campo-busca");
+const botaoAleatorio = document.querySelector("#botao-aleatorio");
+const resultado = document.querySelector("#resultado");
+const listaFavoritos = document.querySelector("#lista-favoritos");
 
 function escaparHTML(valor) {
   return String(valor ?? "")
@@ -27,213 +22,142 @@ function escaparHTML(valor) {
     .replaceAll("'", "&#039;");
 }
 
-function mostrarMensagem(elemento, mensagem) {
-  elemento.innerHTML = `
-    <p class="placeholder">&gt; ${escaparHTML(mensagem)}</p>
-  `;
+function mensagem(elemento, texto) {
+  elemento.innerHTML = `<p class="placeholder">&gt; ${escaparHTML(texto)}</p>`;
 }
 
-// Busca um Pokémon na PokeAPI
-async function buscarPokemon(valor) {
+function dadosParaTabela(pokemon) {
+  return {
+    id: pokemon.id,
+    nome: pokemon.name,
+    altura: pokemon.height,
+    peso: pokemon.weight,
+    experiencia_base: pokemon.base_experience,
+    imagem_url: pokemon.sprites.other?.["official-artwork"]?.front_default || pokemon.sprites.front_default,
+    sprite_url: pokemon.sprites.front_default,
+    tipos: pokemon.types.map((item) => item.type.name).join(", "),
+    habilidades: pokemon.abilities.map((item) => item.ability.name).join(", "),
+    estatisticas: Object.fromEntries(
+      pokemon.stats.map((item) => [item.stat.name, item.base_stat])
+    ),
+    url_pokeapi: `https://pokeapi.co/api/v2/pokemon/${pokemon.id}/`
+  };
+}
+
+async function buscarNaPokeAPI(valor) {
   const busca = String(valor).trim().toLowerCase();
+  if (!busca) return;
 
-  if (!busca) {
-    mostrarMensagem(resultado, "Digite o nome ou número de um Pokémon.");
-    return;
-  }
-
-  mostrarMensagem(resultado, "Buscando Pokémon...");
+  mensagem(resultado, "Consultando a PokeAPI...");
 
   try {
     const resposta = await fetch(
-      `https://pokeapi.co/api/v2/pokemon/${encodeURIComponent(busca )}`
+      `https://pokeapi.co/api/v2/pokemon/${encodeURIComponent(busca)}`
     );
 
-    if (!resposta.ok) {
-      throw new Error("Pokémon não encontrado");
-    }
+    if (!resposta.ok) throw new Error("Pokémon não encontrado");
 
     const pokemon = await resposta.json();
-    renderizarPokemon(pokemon);
+    exibirPokemon(pokemon);
   } catch (erro) {
     console.error(erro);
-    mostrarMensagem(resultado, "Pokémon não encontrado.");
+    mensagem(resultado, "Pokémon não encontrado.");
   }
 }
 
-// Exibe o Pokémon na tela
-function renderizarPokemon(pokemon) {
-  const imagem =
-    pokemon.sprites.other["official-artwork"].front_default ||
-    pokemon.sprites.front_default;
-
-  const dadosExtra = {
-    id: pokemon.id,
-    altura: pokemon.height,
-    peso: pokemon.weight,
-    imagem_url: imagem,
-    tipos: pokemon.types.map((item) => item.type.name),
-    habilidades: pokemon.abilities.map(
-      (item) => item.ability.name
-    ),
-    estatisticas: Object.fromEntries(
-      pokemon.stats.map((item) => [
-        item.stat.name,
-        item.base_stat
-      ])
-    )
-  };
+function exibirPokemon(pokemon) {
+  const dados = dadosParaTabela(pokemon);
+  const imagem = dados.imagem_url || "";
 
   resultado.innerHTML = `
     <article class="pokemon-card">
-      <img
-        src="${imagem}"
-        alt="Imagem de ${escaparHTML(pokemon.name)}"
-      />
-
+      <img src="${escaparHTML(imagem)}" alt="Imagem de ${escaparHTML(pokemon.name)}">
       <h2>#${pokemon.id} — ${escaparHTML(pokemon.name)}</h2>
-
       <p><strong>Altura:</strong> ${pokemon.height} dm</p>
       <p><strong>Peso:</strong> ${pokemon.weight} hg</p>
-
-      <p>
-        <strong>Tipo(s):</strong>
-        ${pokemon.types
-          .map((item) => item.type.name)
-          .join(", ")}
-      </p>
-
-      <p>
-        <strong>Habilidade(s):</strong>
-        ${pokemon.abilities
-          .map((item) => item.ability.name)
-          .join(", ")}
-      </p>
-
-      <button id="botao-salvar-favorito" type="button">
-        SALVAR FAVORITO
-      </button>
+      <p><strong>Tipo(s):</strong> ${escaparHTML(dados.tipos)}</p>
+      <p><strong>Habilidade(s):</strong> ${escaparHTML(dados.habilidades)}</p>
+      <button type="button" id="botao-salvar">SALVAR FAVORITO</button>
     </article>
   `;
 
-  document
-    .getElementById("botao-salvar-favorito")
-    .addEventListener("click", () => {
-      salvarFavorito(pokemon.name, dadosExtra);
-    });
+  document.querySelector("#botao-salvar").addEventListener("click", () => {
+    salvarFavorito(dados);
+  });
 }
 
-// CREATE — salvar favorito
-async function salvarFavorito(nome, extra) {
+// CREATE/UPDATE — salva o Pokémon na tabela Pokedex.
+// O upsert evita erro se o mesmo Pokémon já estiver salvo.
+async function salvarFavorito(dados) {
   const { error } = await supabase
-    .from("Pokedex")
-    .insert({
-      id: extra.id,
-      nome: nome,
-      altura: extra.altura,
-      peso: extra.peso,
-      imagem_url: extra.imagem_url,
-      tipos: extra.tipos.join(", "),
-      habilidades: extra.habilidades.join(", "),
-      estatisticas: extra.estatisticas
-    });
+    .from(TABELA)
+    .upsert(dados, { onConflict: "id" });
 
   if (error) {
-    console.error("Erro ao salvar favorito:", error);
-    alert("Erro ao salvar: " + error.message);
+    console.error("Erro ao salvar no Supabase:", error);
+    alert(`Erro ao salvar: ${error.message}`);
     return;
   }
 
-  alert("Pokémon salvo na tabela Pokedex!");
+  alert("Pokémon salvo com sucesso!");
   listarFavoritos();
 }
 
-
-// READ — listar favoritos
+// READ — lista os Pokémon da tabela Pokedex.
 async function listarFavoritos() {
   const { data, error } = await supabase
-    .from("Pokedex")
-    .select("*")
+    .from(TABELA)
+    .select("id, nome, imagem_url")
     .order("id");
 
   if (error) {
-    console.error("Erro ao listar Pokémon:", error);
-    mostrarMensagem(
-      listaFavoritos,
-      "Erro ao carregar os Pokémon."
-    );
+    console.error("Erro ao listar no Supabase:", error);
+    mensagem(listaFavoritos, `Erro ao carregar: ${error.message}`);
     return;
   }
 
-  if (!data || data.length === 0) {
-    mostrarMensagem(
-      listaFavoritos,
-      "Nenhum Pokémon salvo."
-    );
+  if (!data?.length) {
+    mensagem(listaFavoritos, "Nenhum Pokémon salvo.");
     return;
   }
 
-  listaFavoritos.innerHTML = data
-    .map(
-      (pokemon) => `
-        <div class="favorito">
-          <span>
-            #${pokemon.id}
-            ${escaparHTML(pokemon.nome)}
-          </span>
+  listaFavoritos.innerHTML = data.map((pokemon) => `
+    <div class="favorito">
+      <span>#${escaparHTML(pokemon.id)} — ${escaparHTML(pokemon.nome)}</span>
+      <button type="button" class="botao-remover" data-id="${escaparHTML(pokemon.id)}">REMOVER</button>
+    </div>
+  `).join("");
 
-          <button
-            type="button"
-            class="botao-remover"
-            data-id="${pokemon.id}"
-          >
-            REMOVER
-          </button>
-        </div>
-      `
-    )
-    .join("");
-
-  document
-    .querySelectorAll(".botao-remover")
-    .forEach((botao) => {
-      botao.addEventListener("click", () => {
-        removerFavorito(botao.dataset.id);
-      });
-    });
+  listaFavoritos.querySelectorAll(".botao-remover").forEach((botao) => {
+    botao.addEventListener("click", () => removerFavorito(botao.dataset.id));
+  });
 }
 
-// DELETE — remover favorito
+// DELETE — remove o Pokémon pelo id.
 async function removerFavorito(id) {
   const { error } = await supabase
-    .from("Pokedex")
+    .from(TABELA)
     .delete()
-    .eq("id", id);
+    .eq("id", Number(id));
 
   if (error) {
-    console.error("Erro ao remover Pokémon:", error);
-    alert("Erro ao remover: " + error.message);
+    console.error("Erro ao remover do Supabase:", error);
+    alert(`Erro ao remover: ${error.message}`);
     return;
   }
 
   listarFavoritos();
 }
 
-
-// Botão BUSCAR
 formulario.addEventListener("submit", (evento) => {
   evento.preventDefault();
-  buscarPokemon(campoBusca.value);
+  buscarNaPokeAPI(campoBusca.value);
 });
 
-// Botão ALEATÓRIO
 botaoAleatorio.addEventListener("click", () => {
-  const numeroAleatorio =
-    Math.floor(Math.random() * 1025) + 1;
-
-  campoBusca.value = numeroAleatorio;
-  buscarPokemon(numeroAleatorio);
+  const numero = Math.floor(Math.random() * 1025) + 1;
+  campoBusca.value = numero;
+  buscarNaPokeAPI(numero);
 });
 
-// Carrega os favoritos ao abrir a página
 listarFavoritos();
