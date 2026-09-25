@@ -33,7 +33,7 @@ function dadosParaTabela(pokemon) {
     altura: pokemon.height,
     peso: pokemon.weight,
     experiencia_base: pokemon.base_experience,
-    imagem_url: pokemon.sprites.other?.["official-artwork"]?.front_default || pokemon.sprites.front_default,
+    imagens_url: pokemon.sprites.other?.["official-artwork"]?.front_default || pokemon.sprites.front_default,
     sprite_url: pokemon.sprites.front_default,
     tipos: pokemon.types.map((item) => item.type.name).join(", "),
     habilidades: pokemon.abilities.map((item) => item.ability.name).join(", "),
