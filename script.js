@@ -4,12 +4,13 @@ const SUPABASE_URL =
   "https://hivfuatqzbsjpvkogaxz.supabase.co";
 
 const SUPABASE_ANON_KEY =
-  "sb_publishable_5IE9a5qhVuu2EHU6j6UhFA_DvQHWPmM";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpdmZ1YXRxemJzanB2a29uZ2F4eiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzkwMzY1MDQyLCJleHAiOjIxMDU5NDEwNDJ9.V6U3qJZc6gzAHMtw1giR7gEgyuO4ZQX8uTv3x0DtiHA";
 
 const supabase = createClient(
-  "https://hivfuatqzbsjpvkogaxz.supabase.co",
-  "SUA_CHAVE_PUBLICA"
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
  );
+
 
 const formulario = document.getElementById("form-busca");
 const campoBusca = document.getElementById("campo-busca");
