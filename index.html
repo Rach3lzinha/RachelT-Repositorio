@@ -40,6 +40,28 @@
     </footer>
   </div>
 
-  <script src="script.js"></script>
+<section class="favoritos">
+  <h2>FAVORITOS</h2>
+  <div id="lista-favoritos">
+    <p class="placeholder">> Nenhum favorito salvo.</p>
+  </div>
+</section>
+
+  
+ <script type="module">
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+  const SUPABASE_URL = "https://hivfuatqzbsjpvkogaxz.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_5IE9a5qhVuu2EHU6j6UhFA_DvQHWPmM";
+
+  window.supabaseClient = createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+   );
+</script>
+
+<script src="script.js"></script>
+
+
 </body>
 </html>
