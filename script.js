@@ -67,7 +67,7 @@ async function buscarNaPokeAPI(valor) {
 
 function exibirPokemon(pokemon) {
   const dados = dadosParaTabela(pokemon);
-  const imagem = dados.imagem_url || "";
+  const imagem = dados.imagens_url || "";
 
   resultado.innerHTML = `
     <article class="pokemon-card">
