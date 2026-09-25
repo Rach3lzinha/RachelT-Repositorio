@@ -107,8 +107,8 @@ async function salvarFavorito(dados) {
 async function listarFavoritos() {
   const { data, error } = await supabase
     .from(TABELA)
-    .select("id, nome, imagens_url")
-    .order("id");
+    .select("id, nome, imagens_url, criado_em")
+    .order("criado_em", { ascending: false });
 
   if (error) {
     console.error("Erro ao listar no Supabase:", error);
@@ -123,7 +123,10 @@ async function listarFavoritos() {
 
   listaFavoritos.innerHTML = data.map((pokemon) => `
     <div class="favorito">
-      <span>#${escaparHTML(pokemon.id)} — ${escaparHTML(pokemon.nome)}</span>
+      <span>
+        #${escaparHTML(pokemon.id)} — ${escaparHTML(pokemon.nome)}
+        <small>${pokemon.criado_em ? new Date(pokemon.criado_em).toLocaleString("pt-BR") : ""}</small>
+      </span>
       <button type="button" class="botao-remover" data-id="${escaparHTML(pokemon.id)}">REMOVER</button>
     </div>
   `).join("");
