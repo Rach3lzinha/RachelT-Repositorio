@@ -107,7 +107,7 @@ async function salvarFavorito(dados) {
 async function listarFavoritos() {
   const { data, error } = await supabase
     .from(TABELA)
-    .select("id, nome, imagem_url")
+    .select("id, nome, imagens_url")
     .order("id");
 
   if (error) {
