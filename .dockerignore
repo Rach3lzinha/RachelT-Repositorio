@@ -1,0 +1,9 @@
+.git
+.github
+.devcontainer
+README.md
+*.md
+*.pdf
+rascunhos/
+node_modules/
+.vscode/
