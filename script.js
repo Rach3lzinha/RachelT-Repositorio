@@ -1,3 +1,4 @@
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 // Use somente a URL base do projeto. Não acrescente /rest/v1/.
