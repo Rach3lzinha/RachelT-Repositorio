@@ -1,112 +1,104 @@
-# Pokédex Terminal
+# Pokédex Terminal — Consulta de Pokémon com Favoritos
 
 ## Autor
+Rachel Tolentino de Sena — 22612246
 
-Rachel Tolentino de Sena — Matrícula 22612246
+## Links do Projeto
+- **Repositório GitHub:** [https://github.com/Rach3lzinha/RachelT-Repositorio](https://github.com/Rach3lzinha/RachelT-Repositorio)
+- **Aplicação no ar (GitHub Pages):** [https://rach3lzinha.github.io/RachelT-Repositorio/](https://rach3lzinha.github.io/RachelT-Repositorio/)
+- **Imagem no Docker Hub:** [//hub.docker.com/r/r4ch3lzinha/pokedex-terminal](//hub.docker.com/r/r4ch3lzinha/pokedex-terminal)
+
+---
 
 ## Descrição
-
-Aplicação web com visual de terminal retrô que consulta a PokeAPI e mostra dados completos de qualquer Pokémon: imagem, tipos, altura, peso, habilidades e estatísticas base. A aplicação permite realizar consultas rápidas, sortear um Pokémon e salvar os Pokémon consultados no banco de dados.
+Aplicação web com visual de terminal retrô que consulta a PokeAPI em tempo real e exibe os dados de um Pokémon: imagem, número, altura, peso, tipos e habilidades. Também é possível sortear um Pokémon aleatório e salvar favoritos em um banco de dados na nuvem, que sobrevivem ao fechamento do navegador.
 
 ## API utilizada
-
-- Nome da API: [PokeAPI](https://pokeapi.co/)
-- Documentação: https://pokeapi.co/docs/v2
-- Endpoint consumido: `GET https://pokeapi.co/api/v2/pokemon/{nome-ou-numero}`
-
-## Banco de dados e persistência
-
-A aplicação utiliza o **Supabase** como banco de dados. O Supabase fornece um banco PostgreSQL hospedado na nuvem e permite que a aplicação consulte, salve e remova registros por meio da biblioteca `@supabase/supabase-js`.
-
-A busca inicial dos dados é feita na PokeAPI. Quando o usuário clica em **Salvar favorito**, os dados do Pokémon são enviados para a tabela `Pokedex` no Supabase. Dessa forma, os registros continuam disponíveis mesmo depois que a página é fechada ou recarregada.
-
-### Estrutura da tabela `Pokedex`
-
-| Coluna | Tipo | Descrição |
-|---|---|---|
-| `id` | `int8` | Número identificador do Pokémon e chave primária. |
-| `nome` | `varchar` ou `text` | Nome do Pokémon. |
-| `altura` | `int8` | Altura informada pela PokeAPI, em decímetros. |
-| `peso` | `int8` | Peso informado pela PokeAPI, em hectogramas. |
-| `experiencia_base` | `int8` | Experiência-base do Pokémon. |
-| `imagens_url` | `text` | Endereço da imagem oficial do Pokémon. |
-| `sprite_url` | `text` | Endereço do sprite padrão. |
-| `tipos` | `text` | Tipo ou tipos do Pokémon. |
-| `habilidades` | `text` | Habilidades do Pokémon. |
-| `estatisticas` | `jsonb` | Estatísticas base, como HP, ataque, defesa e velocidade. |
-| `url_pokeapi` | `text` | Endereço do registro correspondente na PokeAPI. |
-| `criado_em` | `timestamptz` | Data e hora em que o registro foi salvo. Possui valor padrão `now()`. |
-
-### O que é salvo
-
-Ao salvar um Pokémon, a aplicação armazena:
-
-- seu número e nome;
-- altura, peso e experiência-base;
-- URL da imagem oficial e do sprite;
-- tipos e habilidades;
-- estatísticas base em formato JSON;
-- URL do registro na PokeAPI;
-- data e hora do salvamento.
-
-O campo `estatisticas` usa o tipo `jsonb` porque reúne várias informações em um único objeto. Um exemplo de valor armazenado é:
-
-```json
-{
-  "hp": 35,
-  "attack": 55,
-  "defense": 40,
-  "special-attack": 50,
-  "special-defense": 50,
-  "speed": 90
-}
-```
-
-### Operações realizadas no banco
-
-O projeto utiliza as operações básicas de persistência:
-
-- **Create/Upsert:** salva o Pokémon na tabela `Pokedex`;
-- **Read:** lista os Pokémon salvos e ordena pela data de criação;
-- **Delete:** remove um Pokémon salvo pelo seu `id`.
-
-O `upsert` é utilizado para evitar erro quando o usuário tenta salvar novamente um Pokémon que já possui o mesmo `id` na tabela.
-
-### Limitação conhecida de segurança
-
-Para fins acadêmicos e de demonstração, a tabela possui políticas de acesso RLS que permitem as operações necessárias ao usuário anônimo do site. Isso significa que visitantes não autenticados podem consultar, inserir e remover registros, conforme as políticas configuradas no Supabase.
-
-Em uma aplicação real, o ideal seria exigir autenticação e restringir as operações para que cada usuário pudesse acessar somente os próprios favoritos.
+- **PokeAPI** — `https://pokeapi.co/api/v2/pokemon/{nome-ou-numero}` (dados e imagens dos Pokémon).
 
 ## Funcionalidades
+- Buscar Pokémon por nome ou número;
+- Sortear um Pokémon aleatório com um clique;
+- Exibir imagem, número, altura, peso, tipos e habilidades do Pokémon;
+- Salvar Pokémon como favorito (Create/Upsert);
+- Listar os favoritos ao abrir a página (Read);
+- Remover favoritos (Delete).
 
-- Buscar um Pokémon pelo nome ou número;
-- Buscar um Pokémon aleatório com um clique;
-- Visualizar imagem oficial, número, tipos, altura, peso, habilidades e estatísticas base;
-- Salvar Pokémon na tabela `Pokedex` do Supabase;
-- Listar os Pokémon salvos;
-- Remover Pokémon salvos;
-- Receber mensagens amigáveis quando o Pokémon não é encontrado ou uma API está indisponível.
+---
 
-## Como executar localmente
+## 💾 Persistência de Dados (Supabase / PostgreSQL)
+Os favoritos são guardados no **Supabase** (PostgreSQL), acessado direto do frontend com a biblioteca `@supabase/supabase-js`.
 
-1. Clone o repositório:
+- **Tabela:** `Pokedex`
+- **Operações:** Create (`upsert` por `id`, evitando duplicados), Read (listagem ordenada por `criado_em`) e Delete (remoção por `id`).
 
-   ```bash
-   git clone URL_DO_REPOSITORIO
-   ```
+### Estrutura da tabela
+| Coluna | Tipo | Descrição |
+|---|---|---|
+| `id` | int (chave primária) | Número do Pokémon na PokeAPI |
+| `nome` | text | Nome do Pokémon |
+| `altura` | int | Altura (decímetros) |
+| `peso` | int | Peso (hectogramas) |
+| `experiencia_base` | int | Experiência base |
+| `imagens_url` | text | URL da imagem oficial |
+| `sprite_url` | text | URL do sprite |
+| `tipos` | text | Tipos, separados por vírgula |
+| `habilidades` | text | Habilidades, separadas por vírgula |
+| `estatisticas` | jsonb | Estatísticas base (HP, ataque, defesa etc.) |
+| `url_pokeapi` | text | Endereço do Pokémon na PokeAPI |
+| `criado_em` | timestamptz (default `now()`) | Data em que foi salvo |
 
-2. Entre na pasta do projeto:
+> Confira os tipos no Table Editor do seu projeto e ajuste esta tabela se estiverem diferentes.
 
-   ```bash
-   cd NOME_DO_REPOSITORIO
-   ```
+### Limitação conhecida
+As políticas de acesso (RLS) da tabela estão abertas para a chave `anon`, permitindo leitura e escrita a qualquer visitante. Isso é aceitável nesta etapa, mas em produção seria necessário autenticação e políticas por usuário.
 
-3. Abra o arquivo `index.html` em um servidor local ou publique o projeto pelo GitHub Pages.
+---
 
-> Como o projeto utiliza módulos JavaScript e chamadas externas para a PokeAPI e o Supabase, recomenda-se executá-lo por meio de um servidor local, como a extensão Live Server do Visual Studio Code, em vez de abrir o arquivo diretamente pelo endereço `file://`.
+## 🐳 Conteinerização com Docker
+A aplicação é servida por um **Nginx (Alpine)** dentro de um container.
 
-## Links
+```dockerfile
+FROM nginx:alpine
+COPY index.html style.css script.js /usr/share/nginx/html/
+EXPOSE 80
+```
 
-- **Aplicação no ar (GitHub Pages):** https://rach3lzinha.github.io/RachelT-Repositorio/
-- **Repositório:** https://github.com/Rach3lzinha/RachelT-Repositorio
+### Como rodar (comando para o avaliador)
+```bash
+docker run -d -p 8080:80 --name pokedex-app SEU-USUARIO-DOCKER/SEU-REPOSITORIO-DOCKER:latest
+```
+
+Acesse em: `http://localhost:8080`
+
+### Build local
+```bash
+docker build -t pokedex-terminal .
+docker run -d -p 8080:80 --name meu-app pokedex-terminal
+```
+
+---
+
+## 🧩 Evidências das Sidequests
+
+### SQ1 · `.dockerignore`
+O arquivo `.dockerignore` exclui da imagem o que não é necessário para rodar a aplicação (`.git`, `README.md`, rascunhos). Isso deixa a imagem menor, porque menos arquivos são enviados ao contexto de build e copiados, e torna o build mais rápido.
+
+### SQ2 · Versionamento de imagem
+Imagem publicada no Docker Hub com as tags `1.0`, `1.1` e `latest`.
+
+### SQ3 · Descrição no Docker Hub
+O overview do repositório no Docker Hub descreve a aplicação, traz o comando `docker run` pronto para copiar e o link do repositório GitHub.
+
+### SQ4 · Orquestração e múltiplos containers
+Dois containers da mesma imagem rodando ao mesmo tempo, em portas diferentes:
+
+```bash
+docker run -d -p 8080:80 --name pokedex-1 SEU-USUARIO-DOCKER/SEU-REPOSITORIO-DOCKER:latest
+docker run -d -p 8081:80 --name pokedex-2 SEU-USUARIO-DOCKER/SEU-REPOSITORIO-DOCKER:latest
+```
+
+Evidência (print do `docker ps`): ![docker ps com dois containers](CAMINHO-DO-PRINT.png)
+
+**Se eu tivesse 100 containers, como gerenciaria?**
+Gerenciar 100 containers à mão seria inviável. O **Kubernetes** resolve isso organizando as máquinas em um **cluster**, onde os containers rodam dentro de **Pods**. Com **réplicas**, defino quantas cópias da aplicação quero e o Kubernetes mantém esse número: se um container falha, ele sobe outro automaticamente. Ele também faz balanceamento de carga entre as réplicas e permite aumentar ou diminuir a quantidade conforme a demanda.
